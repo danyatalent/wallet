@@ -14,30 +14,42 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   Timer? _timer;
 
   WalletBloc(this._walletRepository)
-    : super(const WalletState(wallet: Wallet(address: '', mnemonic: '', balance: ''))) {
-    on<WalletEvent>(_onWalletEvent);
+      : super(const WalletState(wallet: Wallet(address: '', mnemonic: '', balance: ''))) {
+    on<_Started>(_onStarted);
+    on<_RequestFunds>(_onRequestFunds);
+    on<_Refresh>(_onRefresh);
+
+    // Запускаем таймер при инициализации блока
+    _startUpdateTimer();
   }
 
-  Future<void> _onWalletEvent(
-      WalletEvent event, Emitter<WalletState> emit) async {
-      _walletRepository.update();
-
-      await emit.forEach(
-        _walletRepository.getWallet(),
-        onData: (wallet) => state.copyWith(wallet: wallet!),
-      );
-      if (event is _Started) {
-        _startUpdateTimer(emit);
-      }
+  Future<void> _onStarted(
+      _Started event, Emitter<WalletState> emit) async {
+    await _updateWallet(emit);
   }
 
-  void _startUpdateTimer(Emitter<WalletState> emit) {
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
-      _walletRepository.update();
-      await emit.forEach(
-          _walletRepository.getWallet(),
-          onData: (wallet) => state.copyWith(wallet: wallet),
-      );
+  Future<void> _onRequestFunds(
+      _RequestFunds event, Emitter<WalletState> emit) async {
+    // Логика запроса средств
+    emit(state.copyWith(wallet: state.wallet.copyWith(balance: '2.0')));
+  }
+
+  Future<void> _onRefresh(
+      _Refresh event, Emitter<WalletState> emit) async {
+    await _updateWallet(emit);
+  }
+
+  Future<void> _updateWallet(Emitter<WalletState> emit) async {
+    _walletRepository.update();
+    await emit.forEach(
+      _walletRepository.getWallet(),
+      onData: (wallet) => state.copyWith(wallet: wallet),
+    );
+  }
+
+  void _startUpdateTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      add(const WalletEvent.refresh());
     });
   }
 
@@ -45,4 +57,5 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   Future<void> close() {
     _timer?.cancel();
     return super.close();
-  }}
+  }
+}

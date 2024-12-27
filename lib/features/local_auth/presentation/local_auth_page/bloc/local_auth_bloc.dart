@@ -58,8 +58,8 @@ class LocalAuthBloc extends Bloc<LocalAuthEvent, LocalAuthState> {
   
   Future<void> _onLocalAuthEventPinSetup(
       LocalAuthEventPinSetup event, Emitter<LocalAuthState> emit) async {
+    emit(state.copyWith(status: BlocLocalAuthStatus.loading));
     _localAuthRepository.setPin(LocalCredentials(pinCode: state.pinCode));
-    emit(state.copyWith(status: BlocLocalAuthStatus.settingUp));
   }
   
   Future<void> _onLocalAuthEventPinVerify(

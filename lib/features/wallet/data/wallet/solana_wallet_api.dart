@@ -13,11 +13,12 @@ class SolanaWalletApi {
   // todo: make env
   static const rpcUrl = 'https://api.devnet.solana.com';
   static const wsUrl = 'wss://api.devnet.solana.com';
-  static const _walletKey = 'solana_wallet_private_key';
+  static const _walletKey = 'mnemonic_phrase';
 
   SolanaWalletApi() :
         _solanaClient = solana.SolanaClient(rpcUrl: Uri.parse(rpcUrl), websocketUrl: Uri.parse(wsUrl)),
         _storage = const FlutterSecureStorage();
+
 
   Stream<Wallet> getWallet() => _walletController.asBroadcastStream();
 

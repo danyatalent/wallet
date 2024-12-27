@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:wallet/features/wallet/presentation/wallet_page/bloc/wallet_bloc.dart';
 
 class WalletView extends StatelessWidget {
@@ -9,37 +10,48 @@ class WalletView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<WalletBloc, WalletState>(
-        builder: (context, state) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: _BalanceText(state.wallet.balance),
-              ),
-              const SizedBox(height: 24.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _CopyAddressButton(address: state.wallet.address),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Replace with your send logic
-                      },
-                      label: const Text('Send'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
+      body: BlocListener<WalletBloc, WalletState>(
+        listener: (context, state) {
+          // Add your listener logic here
         },
+          child: BlocBuilder<WalletBloc, WalletState> (
+              builder: (context, state) {
+                return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row (
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset('assets/wallet.svg', width: 32.0, height: 32.0),
+                          const SizedBox(width: 8.0),
+                          const Text(
+                            'TerraWallet',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Padding(padding: EdgeInsets.all(8.0)),
+                      _BalanceText(state.wallet.balance),
+                      const Padding(padding: EdgeInsets.only(top:48)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                              child: _CopyAddressButton(address: state.wallet.address),
+                          ),
+                          const Padding(padding: EdgeInsets.all(8)),
+                          const Expanded(
+                              child: _RequestFundsButton(),
+                          ),
+                        ],
+                      ),
+                    ],
+                );
+              }
+          )
       ),
     );
   }
@@ -57,7 +69,7 @@ class _BalanceText extends StatelessWidget {
     return Text(
       message,
       style: const TextStyle(
-        fontSize: 32,
+        fontSize: 16,
         fontWeight: FontWeight.bold,
         color: Colors.pinkAccent,
       ),
@@ -81,6 +93,24 @@ class _CopyAddressButton extends StatelessWidget {
       },
       icon: const Icon(Icons.copy),
       label: const Text('Copy Address'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      ),
+    );
+  }
+}
+
+class _RequestFundsButton extends StatelessWidget {
+  const _RequestFundsButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        context.read<WalletBloc>().add(const WalletEvent.requestFunds());
+      },
+      icon: const Icon(Icons.request_page),
+      label: const Text('Request Funds'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),
