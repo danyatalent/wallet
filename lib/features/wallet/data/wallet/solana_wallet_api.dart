@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:solana/solana.dart' as solana;
@@ -12,23 +13,23 @@ class SolanaWalletApi {
   late final _walletController = BehaviorSubject<Wallet>.seeded(const Wallet(address: '', balance: '', mnemonic: '', privateKey: ''));
 
   // todo: make env
-  static const rpcUrl = 'https://api.devnet.solana.com';
-  static const wsUrl = 'wss://api.devnet.solana.com';
-  static const _walletKey = 'private_key';
+  static final rpcUrl = dotenv.env['RPC_DEV_URL'];
+  static final wsUrl = dotenv.env['WS_DEV_URL'];
+  static final _walletKey = dotenv.env['WALLET_KEY'];
 
   SolanaWalletApi() :
-        _solanaClient = solana.SolanaClient(rpcUrl: Uri.parse(rpcUrl), websocketUrl: Uri.parse(wsUrl)),
+        _solanaClient = solana.SolanaClient(rpcUrl: Uri.parse(rpcUrl!), websocketUrl: Uri.parse(wsUrl!)),
         _storage = const FlutterSecureStorage();
 
 
   Stream<Wallet> getWallet() => _walletController.asBroadcastStream();
 
   Future update() async {
-    var mnemonic = await _storage.read(key: _walletKey);
+    var mnemonic = await _storage.read(key: _walletKey!);
 
     if (mnemonic == null) {
       mnemonic = bip39.generateMnemonic();
-      await _storage.write(key: _walletKey, value: mnemonic);
+      await _storage.write(key: _walletKey!, value: mnemonic);
     }
     
     final keyPair = await solana.Ed25519HDKeyPair.fromMnemonic(mnemonic, account: 0, change: 0);

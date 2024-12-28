@@ -1,12 +1,12 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:wallet/features/local_auth/domain/entities/auth_status.dart';
 import 'package:wallet/features/local_auth/domain/entities/local_credentials.dart';
 
-
 class SecureStorageApi {
   final FlutterSecureStorage _storage;
-  static const _pinKey = 'user_pin';
+  static final _pinKey = dotenv.env['PIN_KEY'];
   
   final _statusController = BehaviorSubject<LocalAuthStatus>.seeded(const LocalAuthStatusUninitialized());
 
@@ -26,7 +26,7 @@ class SecureStorageApi {
   Stream<LocalAuthStatus> getStatus() => _statusController.asBroadcastStream();
 
   Future<void> setPin(LocalCredentials credentials) async {
-    await _storage.write(key: _pinKey, value: credentials.pinCode);
+    await _storage.write(key: _pinKey!, value: credentials.pinCode);
     _statusController.add(const LocalAuthStatusUnauthenticated());
   }
 
@@ -49,7 +49,7 @@ class SecureStorageApi {
   }
 
   Future<String?> getPin() async {
-    return await _storage.read(key: _pinKey);
+    return await _storage.read(key: _pinKey!);
   }
 
   Future<void> close() async {
