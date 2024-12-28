@@ -32,9 +32,11 @@ class ImportPhraseBloc extends Bloc<ImportPhraseEvent, ImportPhraseState> {
     emit(state.copyWith(words: words));
   }
 
-  void _onSubmit(_Submit event, Emitter<ImportPhraseState> emit) {
+  void _onSubmit(_Submit event, Emitter<ImportPhraseState> emit) async {
     emit(state.copyWith(isSubmitting: true));
-    final phrase = state.words.join(' ');
-    _phraseRepository.importPhrase(phrase);
+    final words = List<String>.from(state.words);
+    final phrase = words.join(' ');
+    print('phrase: $phrase, words: $words');
+    await _phraseRepository.importPhrase(phrase);
   }
 }

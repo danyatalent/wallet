@@ -14,10 +14,11 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   Timer? _timer;
 
   WalletBloc(this._walletRepository)
-      : super(const WalletState(wallet: Wallet(address: '', mnemonic: '', balance: ''))) {
+      : super(const WalletState(wallet: Wallet(address: '', balance: '', mnemonic: ''))) {
     on<_Started>(_onStarted);
     on<_RequestFunds>(_onRequestFunds);
     on<_Refresh>(_onRefresh);
+    on<_GetPk>(_onGetPk);
 
     // Запускаем таймер при инициализации блока
     _startUpdateTimer();
@@ -30,8 +31,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   Future<void> _onRequestFunds(
       _RequestFunds event, Emitter<WalletState> emit) async {
-    // Логика запроса средств
-    emit(state.copyWith(wallet: state.wallet.copyWith(balance: '2.0')));
+    await _walletRepository.requestFunds();
   }
 
   Future<void> _onRefresh(
@@ -41,6 +41,8 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   Future<void> _updateWallet(Emitter<WalletState> emit) async {
     _walletRepository.update();
+
+    print(state.wallet.mnemonic);
     await emit.forEach(
       _walletRepository.getWallet(),
       onData: (wallet) => state.copyWith(wallet: wallet),
@@ -51,6 +53,11 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       add(const WalletEvent.refresh());
     });
+  }
+
+  Future<void> _onGetPk(
+      _GetPk event, Emitter<WalletState> emit) async {
+    await _walletRepository.getPk();
   }
 
   @override

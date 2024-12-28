@@ -21,9 +21,9 @@ class LocalAuthView extends StatelessWidget {
           }
           navigation.replaceWallet(context);
          }
-         if (state.status == BlocLocalAuthStatus.pinVerified) {
-          navigation.replaceGeneratePhrase(context);
-         }
+         // if (state.status == BlocLocalAuthStatus.pinVerified) {
+         //  navigation.replaceGeneratePhrase(context);
+         // }
       },
       child:  Scaffold(
         body: Center(

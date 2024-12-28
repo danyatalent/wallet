@@ -46,6 +46,10 @@ class WalletView extends StatelessWidget {
                           const Expanded(
                               child: _RequestFundsButton(),
                           ),
+                          const Padding(padding: EdgeInsets.all(8)),
+                          Expanded(
+                              child: _CopyPrivateKeyButton(mnemonic: state.wallet.mnemonic),
+                          ),
                         ],
                       ),
                     ],
@@ -92,7 +96,7 @@ class _CopyAddressButton extends StatelessWidget {
         );
       },
       icon: const Icon(Icons.copy),
-      label: const Text('Copy Address'),
+      label: const Text('Copy Address', style: TextStyle(color: Colors.white, fontSize: 8)),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),
@@ -110,7 +114,30 @@ class _RequestFundsButton extends StatelessWidget {
         context.read<WalletBloc>().add(const WalletEvent.requestFunds());
       },
       icon: const Icon(Icons.request_page),
-      label: const Text('Request Funds'),
+      label: const Text('Request Funds', style: TextStyle(color: Colors.white, fontSize: 8)),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      ),
+    );
+  }
+}
+
+class _CopyPrivateKeyButton extends StatelessWidget {
+  final String mnemonic;
+
+  const _CopyPrivateKeyButton({super.key, required this.mnemonic});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Clipboard.setData(ClipboardData(text: mnemonic));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Private key copied to clipboard!', style: TextStyle(color: Colors.redAccent))),
+        );
+      },
+      icon: const Icon(Icons.key),
+      label: const Text('Copy mnemonic', style: TextStyle(color: Colors.redAccent, fontSize: 8)),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),

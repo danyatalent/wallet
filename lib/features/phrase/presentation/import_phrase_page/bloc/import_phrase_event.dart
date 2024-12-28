@@ -11,4 +11,5 @@ class ImportPhraseEvent with _$ImportPhraseEvent {
     required String message,
   }) = _SetError;
   const factory ImportPhraseEvent.started() = _Started;
+  const factory ImportPhraseEvent.privateKeyChanged({required String privateKey}) = _PrivateKeyChanged;
 }

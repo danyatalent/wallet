@@ -9,7 +9,9 @@ import 'package:wallet/features/phrase/presentation/welcome_page/welcome_view.da
 
 @RoutePage()
 class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+  final void Function()? onResult;
+
+  const WelcomePage({super.key, this.onResult});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class WelcomePage extends StatelessWidget {
       create: (_) => WelcomeBloc(context.read<PhraseRepository>())
         ..add(const WelcomeEvent.started()),
       child: Provider<BaseWelcomeNavigation>(
-        create: (_) => WelcomeNavigation(),
+        create: (_) => WelcomeNavigation(onResult),
         child: const WelcomeView(),
       ),
     );

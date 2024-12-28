@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wallet/features/phrase/domain/entities/phrase.dart';
 import 'package:wallet/features/phrase/presentation/import_phrase_page/bloc/import_phrase_bloc.dart';
 import 'package:wallet/features/phrase/presentation/import_phrase_page/import_phrase_navigation.dart';
+import 'package:wallet/utils/mnemonic_phrase.dart';
 
 class ImportPhraseView extends StatelessWidget {
   const ImportPhraseView({super.key});
@@ -10,6 +12,7 @@ class ImportPhraseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<TextEditingController> controllers = List.generate(12, (_) => TextEditingController());
+    final TextEditingController privateKeyController = TextEditingController();
 
     return BlocListener<ImportPhraseBloc, ImportPhraseState>(
         listener: (context, state) {
@@ -26,48 +29,15 @@ class ImportPhraseView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Import your mnemonic phrase',
+                      'Import private key',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16.0),
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 16.0,
-                          crossAxisSpacing: 16.0,
-                          childAspectRatio: 4.0,
-                        ),
-                        itemCount: 12,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${index + 1}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              TextFormField(
-                                onChanged: (v) {
-                                  context.read<ImportPhraseBloc>().add(ImportPhraseEvent.updateWord(index: index, word: v));
-                                },
-                                controller: controllers[index],
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: _PhraseGrid(state.words, state.phrase, controllers),
                     ),
                     const SizedBox(height: 16.0),
                     const Center(
@@ -86,25 +56,90 @@ class ImportPhraseView extends StatelessWidget {
 class _SubmitButton extends StatelessWidget {
   const _SubmitButton({super.key});
 
-  String _getMnemonicPhrase(List<String> words) {
-    return words.map((e) => e.trim()).join(' ');
-  }
-
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
-        final mnemonicPhrase = _getMnemonicPhrase(context.read<ImportPhraseBloc>().state.words);
+        final mnemonicPhrase = getMnemonicPhrase(context.read<ImportPhraseBloc>().state.words);
         if (mnemonicPhrase.split(' ').length == 12) {
           context.read<ImportPhraseBloc>().add(const ImportPhraseEvent.submit());
+          context.read<BaseImportPhraseNavigation>().replaceLocalAuth(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please fill in all 12 words')),
+            const SnackBar(content: Text('Please fill in all 12 words', style: TextStyle(color: Colors.redAccent),)),
           );
         }
       },
       label: const Text('Submit'),
-      icon: Image.asset('assets/check.svg', width: 16.0, height: 16.0),
+      icon: SvgPicture.asset('assets/check.svg', width: 16.0, height: 16.0),
+    );
+  }
+}
+
+class _PhraseGrid extends StatelessWidget {
+  final List<String> words;
+  final List<TextEditingController> textControllers;
+  final Phrase phrase;
+
+  const _PhraseGrid(this.words, this.phrase, this.textControllers, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 8.0,
+        crossAxisSpacing: 8.0,
+        childAspectRatio: 3.0,
+      ),
+      itemCount: words.length,
+      itemBuilder: (context, index) {
+        return Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: textControllers[index],
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: null,
+              textAlign: TextAlign.center,
+            )
+        );
+      },
+    );
+  }
+}
+
+class _PrivateKeyField extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _PrivateKeyField(this.controller, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(8.0),
+      width: double.infinity,
+      height: 256.0,
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+        decoration: null,
+        textAlign: TextAlign.center,
+        onChanged: (value) {
+          context.read<ImportPhraseBloc>().add(ImportPhraseEvent.privateKeyChanged(privateKey: value));
+        },
+      ),
     );
   }
 }

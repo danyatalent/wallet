@@ -6,7 +6,6 @@ abstract class BaseLocalAuthNavigation {
   bool get canPop;
 
   void popWithResult(BuildContext context);
-  void replaceGeneratePhrase(BuildContext context);
   void replaceWallet(BuildContext context);
 }
 
@@ -21,11 +20,6 @@ class LocalAuthNavigation implements BaseLocalAuthNavigation {
   @override
   void popWithResult(BuildContext context) {
     onResult!();
-  }
-
-  @override
-  void replaceGeneratePhrase(BuildContext context) {
-    context.router.replace(const GeneratePhraseRoute());
   }
 
   @override

@@ -11,44 +11,57 @@ class WelcomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: BlocBuilder<WelcomeBloc, WelcomeState>(
-          builder: (context, state) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset('assets/wallet.svg', width: 32.0, height: 32.0),
-                    const SizedBox(width: 8.0),
-                    const Text(
-                      'TerraWallet',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+    return BlocListener<WelcomeBloc, WelcomeState>(
+      listener: (context, state) {
+        final navigation = context.read<BaseWelcomeNavigation>();
+
+        if (state.phrase is PhraseSetted) {
+          if (navigation.canPop) {
+            navigation.popWithResult(context);
+            return;
+          }
+          navigation.replaceLocalAuth(context);
+        }
+      },
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: BlocBuilder<WelcomeBloc, WelcomeState>(
+            builder: (context, state) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/wallet.svg', width: 32.0, height: 32.0),
+                      const SizedBox(width: 8.0),
+                      const Text(
+                        'TerraWallet',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const Padding(padding: EdgeInsets.only(top:56)),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _CreateWalletButton()
-                    ),
-                    Padding(padding: EdgeInsets.all(8)),
-                    Expanded(
-                      child: _ImportWalletButton()
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+                    ],
+                  ),
+                  const Padding(padding: EdgeInsets.only(top:56)),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: _CreateWalletButton()
+                      ),
+                      Padding(padding: EdgeInsets.all(8)),
+                      Expanded(
+                          child: _ImportWalletButton()
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

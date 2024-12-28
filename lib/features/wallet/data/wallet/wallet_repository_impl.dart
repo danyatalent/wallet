@@ -21,4 +21,14 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<void> sendTransaction(String toAddress, double amount) {
     return _solanaWalletApi.sendTransaction(toAddress, amount);
   }
+
+  @override
+  Future<void> requestFunds() {
+    return _solanaWalletApi.requestFunds();
+  }
+
+  @override
+  Future<void> getPk() {
+    return _solanaWalletApi.getPk();
+  }
 }
