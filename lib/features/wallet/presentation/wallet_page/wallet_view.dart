@@ -12,7 +12,7 @@ class WalletView extends StatelessWidget {
     return Scaffold(
       body: BlocListener<WalletBloc, WalletState>(
         listener: (context, state) {
-          // Add your listener logic here
+
         },
           child: BlocBuilder<WalletBloc, WalletState> (
               builder: (context, state) {
@@ -39,19 +39,20 @@ class WalletView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                              child: _CopyAddressButton(address: state.wallet.address),
-                          ),
+                          _CopyAddressButton(address: state.wallet.address),
                           const Padding(padding: EdgeInsets.all(8)),
-                          const Expanded(
-                              child: _RequestFundsButton(),
-                          ),
-                          const Padding(padding: EdgeInsets.all(8)),
-                          Expanded(
-                              child: _CopyPrivateKeyButton(mnemonic: state.wallet.mnemonic),
-                          ),
+                          const _RequestFundsButton(),
                         ],
                       ),
+                      const Padding(padding: EdgeInsets.only(top:48)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _CopyMnemonicButton(mnemonic: state.wallet.mnemonic),
+                          const Padding(padding: EdgeInsets.all(8)),
+                          _CopyPrivateKeyButton(privateKey: state.wallet.privateKey)
+                        ],
+                      )
                     ],
                 );
               }
@@ -122,10 +123,10 @@ class _RequestFundsButton extends StatelessWidget {
   }
 }
 
-class _CopyPrivateKeyButton extends StatelessWidget {
+class _CopyMnemonicButton extends StatelessWidget {
   final String mnemonic;
 
-  const _CopyPrivateKeyButton({super.key, required this.mnemonic});
+  const _CopyMnemonicButton({super.key, required this.mnemonic});
 
   @override
   Widget build(BuildContext context) {
@@ -133,11 +134,34 @@ class _CopyPrivateKeyButton extends StatelessWidget {
       onPressed: () {
         Clipboard.setData(ClipboardData(text: mnemonic));
         ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mnemonic copied to clipboard!', style: TextStyle(color: Colors.redAccent))),
+        );
+      },
+      icon: const Icon(Icons.chat_bubble),
+      label: const Text('Copy mnemonic', style: TextStyle(color: Colors.redAccent, fontSize: 8)),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      ),
+    );
+  }
+}
+
+class _CopyPrivateKeyButton extends StatelessWidget {
+  final String privateKey;
+
+  const _CopyPrivateKeyButton({super.key, required this.privateKey});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Clipboard.setData(ClipboardData(text: privateKey));
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Private key copied to clipboard!', style: TextStyle(color: Colors.redAccent))),
         );
       },
       icon: const Icon(Icons.key),
-      label: const Text('Copy mnemonic', style: TextStyle(color: Colors.redAccent, fontSize: 8)),
+      label: const Text('Copy private key', style: TextStyle(color: Colors.redAccent, fontSize: 8)),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),

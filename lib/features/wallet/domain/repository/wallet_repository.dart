@@ -7,5 +7,4 @@ abstract interface class WalletRepository {
 
   Future<void> sendTransaction(String toAddress, double amount);
   Future<void> requestFunds();
-  Future<void> getPk();
 }

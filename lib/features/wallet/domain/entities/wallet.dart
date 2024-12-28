@@ -8,5 +8,6 @@ class Wallet with _$Wallet {
     required String address,
     required String mnemonic,
     required String balance,
+    required String privateKey
   }) = _Wallet;
 }

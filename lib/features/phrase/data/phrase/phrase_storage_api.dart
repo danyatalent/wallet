@@ -34,11 +34,7 @@ class PhraseStorageApi {
   }
 
   Future<void> importPhrase(String phrase) async {
-    print("saving $phrase");
     await _storage.write(key: _walletKey, value: phrase);
-
-    final saved = await _storage.read(key: _walletKey);
-    print("saved $saved");
     _phraseController.add(const PhraseSetting());
   }
 }

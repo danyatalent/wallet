@@ -9,7 +9,7 @@ class SolanaWalletApi {
   final solana.SolanaClient _solanaClient;
   final FlutterSecureStorage _storage;
 
-  late final _walletController = BehaviorSubject<Wallet>.seeded(const Wallet(address: '', balance: '', mnemonic: ''));
+  late final _walletController = BehaviorSubject<Wallet>.seeded(const Wallet(address: '', balance: '', mnemonic: '', privateKey: ''));
 
   // todo: make env
   static const rpcUrl = 'https://api.devnet.solana.com';
@@ -25,21 +25,22 @@ class SolanaWalletApi {
 
   Future update() async {
     var mnemonic = await _storage.read(key: _walletKey);
-    print('from storage $mnemonic');
+
     if (mnemonic == null) {
-      print('null');
       mnemonic = bip39.generateMnemonic();
       await _storage.write(key: _walletKey, value: mnemonic);
     }
     
-    final keyPair = await solana.Ed25519HDKeyPair.fromMnemonic(mnemonic);
+    final keyPair = await solana.Ed25519HDKeyPair.fromMnemonic(mnemonic, account: 0, change: 0);
     final balanceResult = await _solanaClient.rpcClient.getBalance(keyPair.address, commitment: solana.Commitment.confirmed);
     final balance = (balanceResult.value / solana.lamportsPerSol).toString();
+    final pk = await _getPk(keyPair);
 
     _walletController.add(_walletController.value.copyWith(
       address: keyPair.address,
       balance: balance,
       mnemonic: mnemonic,
+      privateKey: pk,
     ));
   }
   
@@ -77,8 +78,10 @@ class SolanaWalletApi {
     );
   }
   
-  Future<void> getPk() async {
-    final pk = await _storage.read(key: _walletKey);
-    _walletController.add(_walletController.value.copyWith(mnemonic: pk!));
+  Future<String> _getPk(solana.Ed25519HDKeyPair pair) async{
+    final pk =
+      await pair.extract().then((value) => value.bytes).then(base58encode);
+    return pk;
   }
+
 }

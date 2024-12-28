@@ -11,8 +11,6 @@ class ImportPhraseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<TextEditingController> controllers = List.generate(12, (_) => TextEditingController());
-    final TextEditingController privateKeyController = TextEditingController();
 
     return BlocListener<ImportPhraseBloc, ImportPhraseState>(
         listener: (context, state) {
@@ -37,7 +35,7 @@ class ImportPhraseView extends StatelessWidget {
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: _PhraseGrid(state.words, state.phrase, controllers),
+                        child: _PhraseGrid(state.words, state.phrase),
                     ),
                     const SizedBox(height: 16.0),
                     const Center(
@@ -78,10 +76,9 @@ class _SubmitButton extends StatelessWidget {
 
 class _PhraseGrid extends StatelessWidget {
   final List<String> words;
-  final List<TextEditingController> textControllers;
   final Phrase phrase;
 
-  const _PhraseGrid(this.words, this.phrase, this.textControllers, {super.key});
+  const _PhraseGrid(this.words, this.phrase, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -104,42 +101,13 @@ class _PhraseGrid extends StatelessWidget {
             alignment: Alignment.center,
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              controller: textControllers[index],
               style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: null,
               textAlign: TextAlign.center,
+              onChanged: (word) => context.read<ImportPhraseBloc>().add(ImportPhraseEvent.updateWord(word: word, index: index)),
             )
         );
       },
-    );
-  }
-}
-
-class _PrivateKeyField extends StatelessWidget {
-  final TextEditingController controller;
-
-  const _PrivateKeyField(this.controller, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(8.0),
-      width: double.infinity,
-      height: 256.0,
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
-        decoration: null,
-        textAlign: TextAlign.center,
-        onChanged: (value) {
-          context.read<ImportPhraseBloc>().add(ImportPhraseEvent.privateKeyChanged(privateKey: value));
-        },
-      ),
     );
   }
 }
